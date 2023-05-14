@@ -1,8 +1,12 @@
 package hello.proxy;
 import hello.proxy.config.AppV1Config;
 import hello.proxy.config.AppV2Config;
+import hello.proxy.config.v1_proxy.InterfaceProxyConfig;
+import hello.proxy.trace.logtrace.LogTrace;
+import hello.proxy.trace.logtrace.ThreadLocalLogTrace;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 
 /**
@@ -10,11 +14,18 @@ import org.springframework.context.annotation.Import;
  * @Configuration 이 자동 등록 되지 안으니 이렇게 @Import 를 사용해 수동으로 등록
  */
 @SpringBootApplication(scanBasePackages = "hello.proxy.app")
-@Import({AppV1Config.class, AppV2Config.class})
+//@Import({AppV1Config.class, AppV2Config.class})
+@Import(InterfaceProxyConfig.class) // v1에 프록시 적용
 public class ProxyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ProxyApplication.class, args);
 	}
 
-
+	/**
+	 * v1 프록시 적용 시 사용할 로그 추적기 스프링에 등록
+	 */
+	@Bean
+	public LogTrace logTrace(){
+		return new ThreadLocalLogTrace();
+	}
 }
