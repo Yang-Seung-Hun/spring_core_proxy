@@ -1,6 +1,7 @@
 package hello.proxy;
 import hello.proxy.config.AppV1Config;
 import hello.proxy.config.AppV2Config;
+import hello.proxy.config.v1_proxy.ConcreteProxyConfig;
 import hello.proxy.config.v1_proxy.InterfaceProxyConfig;
 import hello.proxy.trace.logtrace.LogTrace;
 import hello.proxy.trace.logtrace.ThreadLocalLogTrace;
@@ -15,14 +16,15 @@ import org.springframework.context.annotation.Import;
  */
 @SpringBootApplication(scanBasePackages = "hello.proxy.app")
 //@Import({AppV1Config.class, AppV2Config.class})
-@Import(InterfaceProxyConfig.class) // v1에 프록시 적용
+//@Import(InterfaceProxyConfig.class) // v1에 프록시 적용
+@Import(ConcreteProxyConfig.class) // v2에 프록시 적용
 public class ProxyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ProxyApplication.class, args);
 	}
 
 	/**
-	 * v1 프록시 적용 시 사용할 로그 추적기 스프링에 등록
+	 * v1,2 프록시 적용 시 사용할 로그 추적기 스프링에 등록
 	 */
 	@Bean
 	public LogTrace logTrace(){
