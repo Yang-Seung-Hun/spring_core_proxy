@@ -4,6 +4,7 @@ import hello.proxy.config.AppV2Config;
 import hello.proxy.config.v1_proxy.ConcreteProxyConfig;
 import hello.proxy.config.v1_proxy.InterfaceProxyConfig;
 import hello.proxy.config.v2_dynamicproxy.DynamicProxyBasicConfig;
+import hello.proxy.config.v2_dynamicproxy.DynamicProxyFilterConfig;
 import hello.proxy.trace.logtrace.LogTrace;
 import hello.proxy.trace.logtrace.ThreadLocalLogTrace;
 import org.springframework.boot.SpringApplication;
@@ -19,7 +20,8 @@ import org.springframework.context.annotation.Import;
 //@Import({AppV1Config.class, AppV2Config.class})
 //@Import(InterfaceProxyConfig.class) // v1에 프록시 적용
 //@Import(ConcreteProxyConfig.class) // v2에 프록시 적용
-@Import(DynamicProxyBasicConfig.class) // JDK 동적 프록시 적용
+//@Import(DynamicProxyBasicConfig.class) // JDK 동적 프록시 적용
+@Import(DynamicProxyFilterConfig.class) // JDK 동적 프록시 적용 (no-log 해결)
 public class ProxyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ProxyApplication.class, args);
