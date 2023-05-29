@@ -38,6 +38,14 @@ import org.springframework.context.annotation.Import;
  * - 프록시가 호출되었을 때 부가 기능인 어드바이스를 적용할지 말지 포인트컷을 보고 판단함
  * - 앞서 예시로 말한 orderControllerV1 은 이미 프록시가 걸려있는데, request() 는 현재 포인트컷 조건에 만족하므로 프록시는 어드바이스를 먼저 호출하고, target 을 호출함.
  *   반면 noLog() 는 현재 포인트컷 조건에 만족하지 않으므로 어드바이스를 호출하지 않고 바로 target 을 호출함
+ *
+ * (+주의)하나의 프록시, 여러 Advisor 적용
+ * - 만약 어떤 스프링 빈이 advisor1, advisor2 가 제공하는 포인트컷의 조건을 모두 만족하면 프록시 자동 생성기는 포록시를 몇개 생성할까?
+ *   => 하나의 프록시를 생성한다. 그 이유는 프록시 팩토리가 생성하는 프로시는 내부에 여러 advisor 들을 포함할 수 있기 때문
+ * 프록시 자동 생성기 상황별 정리
+ * 1. advisor1 의 포인트컷 만 만족 ->프록시 1개 생성, 프록시에 advisor1 만 포함
+ * 2. advisor1, advisor2 의 포인트컷을 모두 만족 -> 프록시 1개 생성, 프록시에 advisor1, advisor2 모두 포함
+ * 3. advisor1, advisor2 의 포인트컷을 모두 만족하지 않음 -> 프록시가 생성되지 않음
  */
 @Configuration
 @Import({AppV1Config.class, AppV2Config.class})
