@@ -5,6 +5,7 @@ import hello.proxy.config.AppV2Config;
 import hello.proxy.config.v3_proxyfactory.advice.LogTraceAdvice;
 import hello.proxy.trace.logtrace.LogTrace;
 import org.springframework.aop.Advisor;
+import org.springframework.aop.aspectj.AspectJExpressionPointcut;
 import org.springframework.aop.support.DefaultPointcutAdvisor;
 import org.springframework.aop.support.NameMatchMethodPointcut;
 import org.springframework.context.annotation.Bean;
@@ -45,10 +46,56 @@ public class AutoProxyConfig {
     /**
      * 어드바이저만 등록하면 자동 프록시 생성기가 처리해줌
      */
-    @Bean
+    //@Bean
     public Advisor advisor1(LogTrace logTrace) {
         NameMatchMethodPointcut pointcut = new NameMatchMethodPointcut();
         pointcut.setMappedNames("request*", "order*", "save*");
+
+        LogTraceAdvice advice = new LogTraceAdvice(logTrace);
+        return new DefaultPointcutAdvisor(pointcut, advice);
+    }
+
+    /**
+     * 위 어드바이저에서(advisor1) 문제 발생
+     * - 애플리케이션 서버를 실행해보면, 스프링이 초기화 되면서 기대하지 않은 아래와 같은 로그들이 올라옴.
+     *   그 이유는 지금 사용하는 포인트컷이 단순히 메서드 이름에 "request*", "order*", "save*" 만 포함되어 있으면 매칭 된다고 판단하기 때문.
+     *   결국 스프링이 내부에서 사용하는 빈에도 메서드 이름에 request 라는 단어가 포함되면 프록시가 만들어지고, 어드바이스도 적용되게 됨
+     * (문제 예시)
+     *   EnableWebMvcConfiguration.requestMappingHandlerAdapter()
+     *   EnableWebMvcConfiguration.requestMappingHandlerAdapter() time=286ms
+     *   EnableWebMvcConfiguration.requestMappingHandlerMapping()
+     *   EnableWebMvcConfiguration.requestMappingHandlerMapping() time=30ms
+     *
+     * => 결론적으로 패키지에 메서드 이름까지 함께 지정할 수 있는 정밀한 포인트컷이 필요함
+     */
+    //@Bean
+    public Advisor advisor2(LogTrace logTrace){
+
+        /**
+         * AspectJ 포인트컷 표현식을 사용
+         * - '*' : 모든 반환 타입
+         * - 'hello.proxy.app..' :해당 패키지와 그 하위 패키지
+         * - '*(..)' : '*' 은 모든 메서드 이름, '(..)' 은 파라미터는 상관 없다는 의미
+         * 이후 강의에서 상세히 설명
+         */
+        AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
+        pointcut.setExpression("execution(* hello.proxy.app..*(..))");
+
+        LogTraceAdvice advice = new LogTraceAdvice(logTrace);
+        return new DefaultPointcutAdvisor(pointcut, advice);
+    }
+
+    /**
+     * 위 어드바이저에서(advisor2) 문제 발생
+     * http://localhost:8080/v3/no-log 요청시 로그가 발생하면 안되지만 로그가 출력됨.
+     * 이는 advisor2 는 단순히 package 를 기준으로 포인트컷 매칭을 했기 때문임.
+     * => && 연산을 사용해 두 표현식을 조합하는 것이 가능. 나중에 자세히 설명
+     */
+    @Bean
+    public Advisor advisor3(LogTrace logTrace){
+
+        AspectJExpressionPointcut pointcut = new AspectJExpressionPointcut();
+        pointcut.setExpression("execution(* hello.proxy.app..*(..)) && !execution(* hello.proxy.app..noLog(..))");
 
         LogTraceAdvice advice = new LogTraceAdvice(logTrace);
         return new DefaultPointcutAdvisor(pointcut, advice);
