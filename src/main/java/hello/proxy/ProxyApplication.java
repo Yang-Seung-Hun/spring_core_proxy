@@ -9,6 +9,7 @@ import hello.proxy.config.v3_proxyfactory.ProxyFactoryConfigV1;
 import hello.proxy.config.v3_proxyfactory.ProxyFactoryConfigV2;
 import hello.proxy.config.v4_postprocessor.BeanPostProcessorConfig;
 import hello.proxy.config.v5_autoproxy.AutoProxyConfig;
+import hello.proxy.config.v6_aop.AopConfig;
 import hello.proxy.trace.logtrace.LogTrace;
 import hello.proxy.trace.logtrace.ThreadLocalLogTrace;
 import org.springframework.boot.SpringApplication;
@@ -29,7 +30,8 @@ import org.springframework.context.annotation.Import;
 //@Import(ProxyFactoryConfigV1.class) // ProxyFactory 적용
 //@Import(ProxyFactoryConfigV2.class) // ProxyFactory 적용
 //@Import(BeanPostProcessorConfig.class)// 빈후처리기 v3 적용
-@Import(AutoProxyConfig.class) // 스프링에서 제공하는 빈 후처리기 사용
+//@Import(AutoProxyConfig.class) // 스프링에서 제공하는 빈 후처리기 사용
+@Import(AopConfig.class) // @Aspect 사용
 public class ProxyApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ProxyApplication.class, args);
